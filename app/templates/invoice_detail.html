@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} - Auto Invoice Generator{% endblock %}
+
+{% block content %}
+<style>
+    .invoice-container {
+        max-width: 8.5in;
+        margin: 0 auto;
+        padding: 72px;
+        background: white;
+        font-family: 'Helvetica', 'Arial', sans-serif;
+    }
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    .company-section {
+        flex: 1;
+    }
+    .logo-company-row {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 4px;
+    }
+    .logo-container {
+        flex-shrink: 0;
+        margin-left: -5px;
+    }
+    .logo-container img {
+        width: 260px;
+        height: 130px;
+        object-fit: contain;
+    }
+    .company-address {
+        font-size: 1.2vh;
+        color: #000;
+        line-height: 1.4;
+        margin-top: 4px;
+    }
+    .invoice-details-section {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .invoice-number {
+        font-size: 12px;
+        font-weight: 600;
+        color: #000;
+        margin: 0;
+        margin-bottom: 5px;
+    }
+    .invoice-date {
+        font-size: 12px;
+        color: #000;
+        margin: 0;
+    }
+    .separator-line {
+        width: 100%;
+        height: 1px;
+        background-color: #000;
+        margin: 20px 0;
+    }
+    .to-section {
+        background: #f0f0f0;
+        padding: 4px 0;
+        margin-bottom: 20px;
+    }
+    .to-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #000;
+        margin: 0;
+        margin-bottom: 6px;
+    }
+    .to-content {
+        font-size: 12px;
+        color: #000;
+        margin: 0;
+    }
+    .section-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #000;
+        margin-bottom: 20px;
+        table-layout: fixed;
+    }
+    .invoice-table colgroup col:nth-child(1) { width: 38%; }
+    .invoice-table colgroup col:nth-child(2) { width: 16.4%; }
+    .invoice-table colgroup col:nth-child(3) { width: 16.4%; }
+    .invoice-table colgroup col:nth-child(4) { width: 16.4%; }
+    .invoice-table colgroup col:nth-child(5) { width: 12.8%; }
+    .invoice-table thead th {
+        font-size: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #000;
+        color: #000;
+    }
+    .invoice-table thead th.text-right {
+        text-align: right;
+    }
+    .invoice-table tbody td {
+        font-size: 9px;
+        padding: 10px;
+        border: 1px solid #000;
+        color: #000;
+    }
+    .invoice-table tbody td.text-right {
+        text-align: right;
+    }
+    .invoice-table tfoot th {
+        font-size: 8px;
+        font-weight: 700;
+        padding: 10px;
+        border: 1px solid #000;
+        color: #000;
+        text-align: left;
+    }
+    .invoice-table tfoot th.text-right {
+        text-align: right;
+    }
+    .employee-name {
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .employee-info {
+        font-size: 7px;
+        color: #666;
+        margin-bottom: 1px;
+    }
+    .misc-section {
+        margin-bottom: 20px;
+    }
+    .misc-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .misc-content {
+        font-size: 12px;
+        color: #000;
+        text-align: left;
+    }
+    .grand-total {
+        padding: 12px 0;
+        margin-bottom: 20px;
+        border-top: 1px solid #000;
+    }
+    .grand-total-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #000;
+    }
+    .grand-total-amount {
+        font-size: 12px;
+        font-weight: 700;
+        color: #000;
+    }
+    .notes-section {
+        margin-bottom: 20px;
+    }
+    .notes-content {
+        font-size: 9px;
+        color: #000;
+    }
+    .thank-you {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .thank-you-text {
+        font-size: 12px;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 8px;
+    }
+    .disclaimer {
+        font-size: 9px;
+        color: #666;
+        font-style: italic;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Invoice {{ invoice.invoice_number }}</h1>
+            <div>
+                <a href="{{ url_for('invoices.download_pdf', invoice_id=invoice.id) }}" 
+                   class="btn btn-success">Download PDF</a>
+                <a href="{{ url_for('invoices.invoice_history') }}" class="btn btn-secondary">Back to History</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="invoice-container">
+    <div class="invoice-header">
+        <div class="company-section">
+            <div class="logo-company-row">
+                <div class="logo-container">
+                    <img src="{{ url_for('invoices.serve_logo') }}" alt="Company Logo" 
+                         onerror="this.style.display='none'">
+                </div>
+            </div>
+            <div class="company-address">
+                {% if company_settings.company_address %}
+                    {{ company_settings.company_address | nl2br | safe }}<br>
+                {% else %}
+                    Nyanapahalli Main Rd, Maruthi Layout, Royal Shelters, Stage 4, Bommanahalli, Bengaluru, Karnataka 560068<br>
+                {% endif %}
+                Email: payroll@truezentechnologies.com<br>
+                Phone: 9986553505
+            </div>
+        </div>
+        <div class="invoice-details-section">
+            <div class="invoice-number">INVOICE #{{ invoice.invoice_number }}</div>
+            <div class="invoice-date">DATE: {{ invoice.invoice_date.strftime('%d %B %Y').upper() }}</div>
+        </div>
+    </div>
+    
+    <div class="separator-line"></div>
+    
+    <div class="to-section">
+        <p class="to-label"><strong>TO:</strong></p>
+        <p class="to-content">{{ invoice.invoice_to }}</p>
+    </div>
+    
+    <div class="section-title">EMPLOYEE DETAILS</div>
+    
+    <table class="invoice-table">
+        <colgroup>
+            <col>
+            <col>
+            <col>
+            <col>
+            <col>
+        </colgroup>
+        <thead>
+            <tr>
+                <th>EMPLOYEE NAME</th>
+                <th class="text-right">PRO-RATED SALARY</th>
+                <th class="text-right">EMPLOYEE PF (12%)</th>
+                <th class="text-right">EMPLOYER PF (12%)</th>
+                <th class="text-right">TOTAL COST</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for calc in employee_calculations %}
+            <tr>
+                <td>
+                    <div class="employee-name">{{ calc.employee.name }}</div>
+                    {% if calc.employee.is_new_employee %}
+                        <div class="employee-info">
+                            <strong>New Employee</strong>
+                            {% if calc.employee.date_of_joining %}
+                                | Date of Joining: {{ calc.employee.date_of_joining.strftime('%B %d, %Y') }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    <div class="employee-info">
+                        Salary Date: {{ calc.employee.salary_date }}{% if calc.employee.salary_date == 1 %}st{% elif calc.employee.salary_date == 2 %}nd{% elif calc.employee.salary_date == 3 %}rd{% else %}th{% endif %} of every month
+                    </div>
+                </td>
+                <td class="text-right">INR {{ "{:,.2f}".format(calc.pro_rated_salary) }}</td>
+                <td class="text-right">INR {{ "{:,.2f}".format(calc.employee_pf) }}</td>
+                <td class="text-right">INR {{ "{:,.2f}".format(calc.employer_pf) }}</td>
+                <td class="text-right"><strong>INR {{ "{:,.2f}".format(calc.total_cost) }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>SUB-TOTAL</th>
+                <th class="text-right">INR {{ "{:,.2f}".format(total_salary) }}</th>
+                <th class="text-right">INR {{ "{:,.2f}".format(total_employee_pf) }}</th>
+                <th class="text-right">INR {{ "{:,.2f}".format(total_employer_pf) }}</th>
+                <th class="text-right">INR {{ "{:,.2f}".format(total_salary + total_employee_pf + total_employer_pf) }}</th>
+            </tr>
+        </tfoot>
+    </table>
+    
+    {% if invoice.miscellaneous_cost and invoice.miscellaneous_cost > 0 %}
+    <div class="misc-section">
+        <div class="misc-content">Miscellaneous Cost: INR {{ "{:,.2f}".format(invoice.miscellaneous_cost) }}</div>
+    </div>
+    {% endif %}
+    
+    {% if service_fee and service_fee > 0 %}
+    <div class="misc-section">
+        <div class="misc-content">
+            <strong>Service Fee:</strong>
+            <table style="width: 100%; margin-top: 4px; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 4px 0; font-size: 12px;">Base Service Fee (₹6,250 per employee)</td>
+                    <td style="padding: 4px 0; font-size: 12px; text-align: right;">INR {{ "{:,.2f}".format(service_fee_base) }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 4px 0; font-size: 12px;">GST (18%)</td>
+                    <td style="padding: 4px 0; font-size: 12px; text-align: right;">INR {{ "{:,.2f}".format(service_fee_gst) }}</td>
+                </tr>
+                <tr style="border-top: 0.5px solid #ddd;">
+                    <td style="padding: 4px 0; font-size: 12px; font-weight: 700;"><strong>Total Service Fee</strong></td>
+                    <td style="padding: 4px 0; font-size: 12px; text-align: right; font-weight: 700;"><strong>INR {{ "{:,.2f}".format(service_fee) }}</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="grand-total">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="grand-total-label">GRAND TOTAL</span>
+            <span class="grand-total-amount">INR {{ "{:,.2f}".format(grand_total) }}</span>
+        </div>
+    </div>
+    
+    {% if invoice.notes %}
+    <div class="notes-section">
+        <div class="notes-content">{{ invoice.notes | nl2br | safe }}</div>
+    </div>
+    {% endif %}
+    
+    <div class="thank-you">
+        <p class="thank-you-text"><strong>Thank you for your business!</strong></p>
+        <p class="disclaimer">This is a computer-generated invoice. No signature required.</p>
+    </div>
+</div>
+{% endblock %}

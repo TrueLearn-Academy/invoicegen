@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Invoice - Auto Invoice Generator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Generate Invoice</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Invoice Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('invoices.generate_invoice') }}">
+                    <div class="mb-3">
+                        <label for="client_consultancy" class="form-label">Client/Consultancy <span class="text-danger">*</span></label>
+                        <select class="form-select" id="client_consultancy" name="client_consultancy" required>
+                            <option value="">Select Client/Consultancy</option>
+                            {% for consultancy in consultancies %}
+                            <option value="{{ consultancy }}">{{ consultancy }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="invoice_to" class="form-label">Invoice To <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="invoice_to" name="invoice_to" required 
+                               placeholder="Enter client/consultancy name or address">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Select Employees <span class="text-danger">*</span></label>
+                        <div id="employee-list" class="border p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                            <p class="text-muted">Please select a client/consultancy first</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Calculations</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <strong>Total Monthly Payroll:</strong>
+                                        <div class="h4 text-primary" id="total-monthly">₹0.00</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <strong>Total Annual Payroll:</strong>
+                                        <div class="h4 text-success" id="total-annual">₹0.00</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="include_service_fee" name="include_service_fee" value="1">
+                            <label class="form-check-label" for="include_service_fee">
+                                <strong>Include Service Fee</strong> (₹6,250 per employee + 18% GST)
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">Service fee: ₹6,250 per employee + 18% GST = ₹7,375 per employee</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="miscellaneous_cost" class="form-label">Miscellaneous Cost (₹)</label>
+                        <input type="number" class="form-control" id="miscellaneous_cost" name="miscellaneous_cost" 
+                               step="0.01" min="0" value="0" placeholder="Enter miscellaneous cost if any">
+                        <small class="form-text text-muted">Additional costs to be included in the invoice</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                  placeholder="Additional notes or terms..."></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">Generate Invoice</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const employees = {{ employees | tojson }};
+    
+    document.getElementById('client_consultancy').addEventListener('change', function() {
+        const consultancy = this.value;
+        const employeeList = document.getElementById('employee-list');
+        const invoiceToField = document.getElementById('invoice_to');
+        const selectedEmployees = new Set();
+        
+        // Auto-populate invoice_to field with selected consultancy
+        if (consultancy) {
+            invoiceToField.value = consultancy;
+        } else {
+            invoiceToField.value = '';
+        }
+        
+        if (!consultancy) {
+            employeeList.innerHTML = '<p class="text-muted">Please select a client/consultancy first</p>';
+            updateTotals([]);
+            return;
+        }
+        
+        const filteredEmployees = employees.filter(emp => emp.client_consultancy === consultancy);
+        
+        if (filteredEmployees.length === 0) {
+            employeeList.innerHTML = '<p class="text-muted">No employees found for this consultancy</p>';
+            updateTotals([]);
+            return;
+        }
+        
+        let html = '';
+        filteredEmployees.forEach(emp => {
+            html += `
+                <div class="form-check mb-2">
+                    <input class="form-check-input employee-checkbox" type="checkbox" 
+                           value="${emp.id}" id="emp-${emp.id}" 
+                           data-monthly="${emp.salary_per_month}" 
+                           data-annual="${emp.salary_per_annum}">
+                    <label class="form-check-label" for="emp-${emp.id}">
+                        <strong>${emp.name}</strong> - 
+                        Monthly: INR ${parseFloat(emp.salary_per_month).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})} | 
+                        Annual: INR ${parseFloat(emp.salary_per_annum).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </label>
+                </div>
+            `;
+        });
+        
+        employeeList.innerHTML = html;
+        
+        // Add event listeners to checkboxes
+        document.querySelectorAll('.employee-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateTotals();
+            });
+        });
+        
+        updateTotals([]);
+    });
+    
+    function updateTotals() {
+        const checkboxes = document.querySelectorAll('.employee-checkbox:checked');
+        let totalMonthly = 0;
+        let totalAnnual = 0;
+        
+        checkboxes.forEach(checkbox => {
+            totalMonthly += parseFloat(checkbox.dataset.monthly) || 0;
+            totalAnnual += parseFloat(checkbox.dataset.annual) || 0;
+        });
+        
+        document.getElementById('total-monthly').textContent = '₹' + totalMonthly.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('total-annual').textContent = '₹' + totalAnnual.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    
+    // Ensure selected employees are submitted
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const checkboxes = document.querySelectorAll('.employee-checkbox:checked');
+        if (checkboxes.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one employee');
+            return false;
+        }
+        
+        // Add hidden inputs for selected employees
+        checkboxes.forEach(checkbox => {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'employee_ids';
+            hiddenInput.value = checkbox.value;
+            this.appendChild(hiddenInput);
+        });
+    });
+</script>
+{% endblock %}
+

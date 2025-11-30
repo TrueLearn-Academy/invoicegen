@@ -1,0 +1,44 @@
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.card {
+    border: none;
+    border-radius: 8px;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.btn {
+    border-radius: 6px;
+}
+
+.alert {
+    border-radius: 6px;
+}
+
+.form-control, .form-select {
+    border-radius: 6px;
+}
+
+#employee-list {
+    background-color: #f8f9fa;
+}
+
+.form-check-label {
+    cursor: pointer;
+}
+

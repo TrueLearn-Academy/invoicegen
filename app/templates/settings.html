@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Company Settings - Auto Invoice Generator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Company Settings</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Company Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('settings.company_settings') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="company_name" class="form-label">Company Name</label>
+                        <input type="text" class="form-control" id="company_name" 
+                               value="{{ settings.company_name }}" disabled>
+                        <small class="form-text text-muted">Company name is fixed to "TRUEZEN TECHNOLOGIES"</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Company Logo</label>
+                        <input type="file" class="form-control" id="logo" name="logo" 
+                               accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml">
+                        <small class="form-text text-muted">Upload company logo (PNG, JPG, JPEG, GIF, or SVG). Logo will appear before company name on invoices.</small>
+                        {% if settings.logo_path %}
+                        <div class="mt-2">
+                            <p class="mb-1">Current logo:</p>
+                            <img src="{{ url_for('static', filename=settings.logo_path) }}" 
+                                 alt="Company Logo" style="max-height: 100px; max-width: 200px;" class="img-thumbnail">
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="company_address" class="form-label">Company Address <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="company_address" name="company_address" 
+                                  rows="5" required>{{ settings.company_address }}</textarea>
+                        <small class="form-text text-muted">Enter the complete company address</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

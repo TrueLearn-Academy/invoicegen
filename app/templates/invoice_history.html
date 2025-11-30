@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice History - Auto Invoice Generator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Invoice History</h1>
+            <a href="{{ url_for('invoices.generate_invoice') }}" class="btn btn-success">Generate New Invoice</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">All Invoices</h5>
+            </div>
+            <div class="card-body">
+                {% if invoices %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Invoice Number</th>
+                                <th>Date</th>
+                                <th>Invoice To</th>
+                                <th>Client/Consultancy</th>
+                                <th>Monthly Total</th>
+                                <th>Annual Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in invoices %}
+                            <tr>
+                                <td><strong>{{ invoice.invoice_number }}</strong></td>
+                                <td>{{ invoice.invoice_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ invoice.invoice_to }}</td>
+                                <td>{{ invoice.client_consultancy }}</td>
+                                <td>INR {{ "{:,.2f}".format(invoice.total_monthly_payroll) }}</td>
+                                <td>INR {{ "{:,.2f}".format(invoice.total_annual_payroll) }}</td>
+                                <td>
+                                    <a href="{{ url_for('invoices.view_invoice', invoice_id=invoice.id) }}" 
+                                       class="btn btn-sm btn-primary">View</a>
+                                    <a href="{{ url_for('invoices.download_pdf', invoice_id=invoice.id) }}" 
+                                       class="btn btn-sm btn-success">Download PDF</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    No invoices found. <a href="{{ url_for('invoices.generate_invoice') }}">Generate your first invoice</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

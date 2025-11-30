@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Invoice Preview - TRUEZEN TECHNOLOGIES</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .invoice-container {
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            margin-bottom: 30px;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .invoice-details {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .invoice-number {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #3498db;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #ecf0f1;
+            font-size: 16px;
+        }
+        .notes {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .preview-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-badge">
+        📄 SAMPLE INVOICE PREVIEW - This is how your generated invoices will look
+    </div>
+    
+    <div class="invoice-container">
+        <div class="header">
+            <div class="company-name">TRUEZEN TECHNOLOGIES</div>
+            <div>123 Business Street<br>
+            Suite 100<br>
+            City, State 12345<br>
+            United States</div>
+            <div class="invoice-details">
+                <div class="invoice-number">Invoice: INV-20241215-001</div>
+                <div>Date: December 15, 2024</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Invoice To:</div>
+            <div>
+                <strong>ABC Consultancy Inc.</strong><br>
+                456 Client Avenue<br>
+                Business District<br>
+                City, State 67890
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Employee Details</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th class="text-right">Monthly Salary</th>
+                        <th class="text-right">Annual Salary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John Doe</td>
+                        <td class="text-right">$8,333.33</td>
+                        <td class="text-right">$100,000.00</td>
+                    </tr>
+                    <tr>
+                        <td>Jane Smith</td>
+                        <td class="text-right">$10,000.00</td>
+                        <td class="text-right">$120,000.00</td>
+                    </tr>
+                    <tr>
+                        <td>Robert Johnson</td>
+                        <td class="text-right">$7,500.00</td>
+                        <td class="text-right">$90,000.00</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td><strong>Total</strong></td>
+                        <td class="text-right"><strong>$25,833.33</strong></td>
+                        <td class="text-right"><strong>$310,000.00</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <div class="notes">
+            <strong>Notes:</strong><br>
+            This invoice covers the monthly payroll for December 2024. Payment is due within 30 days of invoice date. 
+            Please remit payment to the address listed above.
+        </div>
+        
+        <div class="footer">
+            <p>This is a computer-generated invoice. No signature required.</p>
+            <p>Generated by Auto Invoice Generator</p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px; color: #666;">
+        <p>This is a preview. Actual invoices will be generated as PDF files when you use the application.</p>
+    </div>
+</body>
+</html>
+
